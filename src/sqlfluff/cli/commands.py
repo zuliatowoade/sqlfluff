@@ -82,7 +82,8 @@ def lint(verbose, nocolor, dialect, rules, paths):
     result = lnt.lint_paths(paths)
     # Output the results
     output = format_linting_result(result, verbose=verbose)
-    click.echo(output, color=color)
+    # Echo the output out, without adding a newline
+    click.echo(output, color=color, nl=False)
     sys.exit(result.stats()['exit code'])
 
 
@@ -118,14 +119,16 @@ def fix(verbose, nocolor, dialect, rules, force, paths):
         ))
         if force:
             click.echo('FORCE MODE: Attempting fixes...')
-            click.echo(format_linting_fixes(result, verbose=verbose), color=color)
+            fixes = result.fix()
+            click.echo(format_linting_fixes(fixes, verbose=verbose), color=color)
             click.echo('Done. Please check your files to confirm.')
         else:
             click.echo('Are you sure you wish to attempt to fix these? [Y/n] ', nl=False)
             c = click.getchar()
             if c == 'Y':
                 click.echo('Attempting fixes...')
-                click.echo(format_linting_fixes(result, verbose=verbose), color=color)
+                fixes = result.fix()
+                click.echo(format_linting_fixes(fixes, verbose=verbose), color=color)
                 click.echo('Done. Please check your files to confirm.')
             elif c == 'n':
                 click.echo('Aborting...')
