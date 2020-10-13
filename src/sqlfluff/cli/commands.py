@@ -204,8 +204,10 @@ def dialects(**kwargs):
 @click.option('--nofail', is_flag=True,
               help=('If set, the exit code will always be zero, regardless of violations '
                     'found. This is potentially useful during rollout.'))
+@click.option('--not-ignore-files', is_flag=True,
+              help=('If set, files will not be ignored by configuration files'))
 @click.argument('paths', nargs=-1)
-def lint(paths, format, nofail, logger=None, **kwargs):
+def lint(paths, format, nofail, not_ignore_files, logger=None, **kwargs):
     """Lint SQL files via passing a list of files or using stdin.
 
     PATH is the path to a sql file or directory to lint. This can be either a
@@ -242,7 +244,11 @@ def lint(paths, format, nofail, logger=None, **kwargs):
         click.echo(format_linting_result_header(verbose=verbose))
         try:
             # TODO: Remove verbose
-            result = lnt.lint_paths(paths, ignore_non_existent_files=False)
+            result = lnt.lint_paths(
+                paths,
+                ignore_non_existent_files=False,
+                ignore_files=not not_ignore_files,
+            )
         except IOError:
             click.echo(colorize('The path(s) {0!r} could not be accessed. Check it/they exist(s).'.format(paths), 'red'))
             sys.exit(1)
